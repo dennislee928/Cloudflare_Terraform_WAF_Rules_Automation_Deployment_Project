@@ -6,14 +6,14 @@
 !.env.example
 
 # JavaScript
-node_modules/
-coverage/
-*.log
+**/node_modules/
+**/coverage/
+**/*.log
 
 # Terraform
-.terraform/
-*.tfstate
-*.tfstate.*
-terraform.tfvars
-.terraformrc
-terraform.rc
+**/.terraform/
+**/*.tfstate
+**/*.tfstate.*
+**/terraform.tfvars
+**/.terraformrc
+**/terraform.rc

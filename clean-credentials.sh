@@ -1,13 +1,71 @@
 #!/bin/bash
 
-echo "開始清理專案..."
+echo "開始清理 Terraform module..."
+
+# 更新 module 結構
+mkdir -p module
+mv js-scripts module/
+mv cloudflare-terraform module/
+
+# 創建 module 的 README.md
+cat > README.md << EOF
+# Cloudflare Terraform Module
+
+This module helps you manage Cloudflare resources including zones, DNS records, and WAF rules.
+
+## Usage
+
+\`\`\`hcl
+module "cloudflare" {
+  source = "github.com/[your-username]/[repo-name]"
+
+  cloudflare_api_token = var.cloudflare_api_token
+  account_id          = var.account_id
+  zone_names          = ["example.com"]
+  plan                = "free"
+  dns_records = {
+    "example.com" = [
+      {
+        type  = "A"
+        name  = "@"
+        value = "1.2.3.4"
+        ttl   = 1
+      }
+    ]
+  }
+}
+\`\`\`
+
+## Requirements
+
+| Name | Version |
+|------|---------|
+| terraform | >= 1.0 |
+| cloudflare | ~> 4.10.0 |
+
+## Inputs
+
+| Name | Description | Type | Required |
+|------|-------------|------|----------|
+| cloudflare_api_token | Cloudflare API token | string | yes |
+| account_id | Cloudflare account ID | string | yes |
+| zone_names | List of zone names | list(string) | yes |
+| plan | Cloudflare plan for the zone | string | yes |
+| dns_records | DNS records for each zone | map(list(object)) | yes |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| zone_ids | The IDs of the created zones |
+EOF
 
 # 清理 js-scripts 目錄
 echo "清理 js-scripts 目錄..."
 js_files=(
-    "js-scripts/set_waf_rules.js"
-    "js-scripts/user-agent.js"
-    "js-scripts/place_autorenew_certificates.js"
+    "module/js-scripts/set_waf_rules.js"
+    "module/js-scripts/user-agent.js"
+    "module/js-scripts/place_autorenew_certificates.js"
 )
 
 for file in "${js_files[@]}"; do
@@ -21,18 +79,9 @@ for file in "${js_files[@]}"; do
     fi
 done
 
-# 創建 js-scripts/.gitignore
-echo "創建 js-scripts/.gitignore..."
-cat > js-scripts/.gitignore << EOF
-.env
-*.log
-node_modules/
-.DS_Store
-EOF
-
 # 創建 js-scripts/.env.example
 echo "創建 js-scripts/.env.example..."
-cat > js-scripts/.env.example << EOF
+cat > module/js-scripts/.env.example << EOF
 CLOUDFLARE_API_TOKEN=your_api_token_here
 CLOUDFLARE_ACCOUNT_ID=your_account_id_here
 DOMAIN_NAME=your_domain_here
@@ -40,12 +89,12 @@ EOF
 
 # 清理 cloudflare-terraform 目錄
 echo "清理 cloudflare-terraform 目錄..."
-if [ -f "cloudflare-terraform/terraform.tfvars" ]; then
-    rm cloudflare-terraform/terraform.tfvars
+if [ -f "module/cloudflare-terraform/terraform.tfvars" ]; then
+    rm module/cloudflare-terraform/terraform.tfvars
 fi
 
-# 創建 cloudflare-terraform/terraform.tfvars.example
-cat > cloudflare-terraform/terraform.tfvars.example << EOF
+# 創建 terraform.tfvars.example
+cat > module/cloudflare-terraform/terraform.tfvars.example << EOF
 cloudflare_api_token = "your_api_token_here"
 account_id = "your_account_id_here"
 zone_names = ["example.com"]
@@ -73,17 +122,17 @@ cat > .gitignore << EOF
 !.env.example
 
 # JavaScript
-node_modules/
-coverage/
-*.log
+**/node_modules/
+**/coverage/
+**/*.log
 
 # Terraform
-.terraform/
-*.tfstate
-*.tfstate.*
-terraform.tfvars
-.terraformrc
-terraform.rc
+**/.terraform/
+**/*.tfstate
+**/*.tfstate.*
+**/terraform.tfvars
+**/.terraformrc
+**/terraform.rc
 EOF
 
 # 移除任何可能存在的敏感檔案
