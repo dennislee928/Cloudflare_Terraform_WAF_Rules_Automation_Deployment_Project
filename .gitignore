@@ -1,0 +1,19 @@
+# General
+.DS_Store
+*.log
+.env
+.env.*
+!.env.example
+
+# JavaScript
+node_modules/
+coverage/
+*.log
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+terraform.tfvars
+.terraformrc
+terraform.rc
